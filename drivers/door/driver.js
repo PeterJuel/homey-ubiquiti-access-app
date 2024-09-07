@@ -14,7 +14,7 @@ class MyDriver extends Homey.Driver {
   /**
    * onPair is called when a user starts pairing a device.
    * Use session to handle specific steps during the pairing process.
-   */
+   */ 
   onPair(session) {
     // Handler for the login credentials
     session.setHandler("login", async () => {
