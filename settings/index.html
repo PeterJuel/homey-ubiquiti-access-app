@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="text/javascript"
+      src="/homey.js"
+      data-origin="settings"
+    ></script>
+    <style>
+      #save-hint {
+        display: none;
+        color: green;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="homey-header">
+      <h1 class="homey-title" data-i18n="settings.title">
+        Ubiquiti Access App Settings
+      </h1>
+      <p class="homey-subtitle" data-i18n="settings.subtitle">
+        Configure your local Ubiquiti account
+      </p>
+    </header>
+
+    <form class="homey-form">
+      <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend">Ubiquiti Settings</legend>
+
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="ip_address">IP Address</label>
+          <input class="homey-form-input" id="ip_address" type="text" value="" />
+        </div>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="username">Username</label>
+          <input class="homey-form-input" id="username" type="text" value="" />
+        </div>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="password">Password</label>
+          <input class="homey-form-input" id="password" type="password" value="" />
+        </div>
+      </fieldset>
+
+      <button id="save" class="homey-button-primary-full">Save changes</button>
+      <p id="save-hint">Settings Saved!</p>
+    </form>
+
+    <script type="text/javascript">
+      function onHomeyReady(Homey) {
+        Homey.ready();
+
+        var ipAddressElement = document.getElementById("ip_address");
+        var usernameElement = document.getElementById("username");
+        var passwordElement = document.getElementById("password");
+        var saveElement = document.getElementById("save");
+        var saveHintElement = document.getElementById("save-hint");
+
+        // Load existing settings
+        Homey.get("ip_address", function (err, ipAddress) {
+          if (err) return Homey.alert(err);
+          ipAddressElement.value = ipAddress || '';
+        });
+
+        Homey.get("username", function (err, username) {
+          if (err) return Homey.alert(err);
+          usernameElement.value = username || '';
+        });
+
+        Homey.get("password", function (err, password) {
+          if (err) return Homey.alert(err);
+          passwordElement.value = password || '';
+        });
+
+        // Save the settings when the button is clicked
+        saveElement.addEventListener("click", function (e) {
+          e.preventDefault(); // Prevent form submission
+          
+          Homey.set("ip_address", ipAddressElement.value, function (err) {
+            if (err) return Homey.alert(err);
+          });
+          Homey.set("username", usernameElement.value, function (err) {
+            if (err) return Homey.alert(err);
+          });
+          Homey.set("password", passwordElement.value, function (err) {
+            if (err) return Homey.alert(err);
+          });
+
+          // Show the "Saved" hint
+          saveHintElement.style.display = 'block';
+
+          // Hide the hint after 2 seconds
+          setTimeout(function () {
+            saveHintElement.style.display = 'none';
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>
