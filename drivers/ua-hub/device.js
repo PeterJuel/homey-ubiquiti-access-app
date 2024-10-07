@@ -1,81 +1,72 @@
 "use strict";
 
-const { getDeviceById, unlockDevice } = require("../../lib/api");
 const Homey = require("homey");
+const Handler = require("../../lib/handlers");
+const { getDeviceById } = require("../../lib/api");
 
 class uaHubDevice extends Homey.Device {
   async onInit() {
     this.log("Device initialized:", this.getName());
+    this.warningTimeout = null;
+
+    // Create an instance of the handler class
+    this.handler = new Handler(this);
 
     // Set up a listener for the "locked" capability
     this.registerCapabilityListener("locked", async (value) => {
-      if (value === false) {
-        // Door is being unlocked
-        this.log("Door is being unlocked");
-        await this.handleUnlock();
+      if (value) {
+        this.log("Lock command received");
+        await this.handler.handleLock();
+      } else {
+        this.log("Unlock command received");
+        await this.handler.handleUnlock();
       }
+      return Promise.resolve();
     });
+
+    // Set the initial lock status
+    await this.updateLockStatus();
+
+    // Start polling the lock status every 1 minute
+    this.startPollingLockStatus();
   }
 
-  /**
-   * Handle the door unlocking logic.
-   */
-  async handleUnlock() {
-    
+  async startPollingLockStatus() {
+    this.pollingInterval = setInterval(async () => {
+      await this.updateLockStatus();
+    }, 60 * 1000); // Poll every 60 seconds
+  }
+
+  async updateLockStatus() {
     try {
-      // Fetch full device data to get config values
-      const deviceData = await getDeviceById(
-        this.homey,
-        this.getData().unique_id
-      );
+      const uniqueId = this.getData().unique_id;
+      const device = await getDeviceById(this.homey, uniqueId);
 
-      // Extract the hold_relay_seconds value from the configs
-      const holdRelaySeconds = this.getConfigValue(
-        deviceData,
-        "hold_relay_seconds"
-      );
-      const holdTime = holdRelaySeconds ? parseInt(holdRelaySeconds, 10) : 30; // Default to 30 seconds if not found
+      if (device) {
+        const lockState = device.configs.find(
+          (config) => config.key === "input_state_rly-lock_dry"
+        );
 
-      this.log(`Hold relay time (in seconds): ${holdTime}`);
+        if (lockState) {
+          const isLocked = lockState.value === "off";
+          this.log(`Polled lock status: ${isLocked ? "Locked" : "Unlocked"}`);
 
-      // Unlock the device via API
-      await unlockDevice(this.homey, deviceData.location_id);
-
-      // Schedule capability re-lock after the hold time
-      this.scheduleCapabilityUnlock(holdTime);
+          // Update the capability status if needed
+          if (this.getCapabilityValue("locked") !== isLocked) {
+            await this.setCapabilityValue("locked", isLocked);
+          }
+        }
+      }
     } catch (error) {
-      this.log("Error during unlock handling:", error.message);
+      this.log("Error updating lock status:", error.message);
     }
   }
 
-  /**
-   * Extract config value by key.
-   */
-  getConfigValue(deviceData, key) {
-    const config = deviceData.configs.find((config) => config.key === key);
-    return config ? config.value : null;
-  }
-
-  /**
-   * Schedule capability update for re-locking after a set number of seconds.
-   * This only updates Homey's locked status, not the physical lock.
-   */
-  scheduleCapabilityUnlock(holdRelaySeconds) {
-    // Clear existing timer if there is one
-    if (this.unlockTimer) {
-      clearTimeout(this.unlockTimer);
+  async onDeleted() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
     }
-
-    // Set the capability to unlocked
-    this.setCapabilityValue("locked", false);
-
-    // Schedule re-locking the capability after holdRelaySeconds
-    this.unlockTimer = setTimeout(() => {
-      this.setCapabilityValue("locked", true); // Update Homey to indicate the door is locked
-      this.log(
-        `Homey status updated to 'locked' after ${holdRelaySeconds} seconds`
-      );
-    }, holdRelaySeconds * 1000); // Convert to milliseconds
+    this.log("Device deleted:", this.getName());
   }
 }
 

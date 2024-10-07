@@ -8,7 +8,7 @@
     "local"
   ],
   "name": {
-    "en": "Ubiquiti Access"
+    "en": "Ubiquiti UniFi Access"
   },
   "description": {
     "en": "Seamlessly manage door access and security, and let the doors open for you."
@@ -26,15 +26,17 @@
     "name": "Peter Jensen",
     "email": "peterjuel@gmail.com"
   },
+  "brandColor": "#275ed9",
   "drivers": [
     {
       "name": {
-        "en": "Door"
+        "en": "Access Hub"
       },
       "class": "lock",
       "capabilities": [
         "locked",
-        "lock_mode"
+        "next_lock",
+        "forced_open"
       ],
       "pair": [
         {
@@ -57,14 +59,42 @@
       ],
       "connectivity": [],
       "images": {
-        "small": "/drivers/door/assets/images/small.png",
-        "large": "/drivers/door/assets/images/large.png",
-        "xlarge": "/drivers/door/assets/images/xlarge.png"
+        "small": "/drivers/ua-hub/assets/images/small.png",
+        "large": "/drivers/ua-hub/assets/images/large.png",
+        "xlarge": "/drivers/ua-hub/assets/images/xlarge.png"
       },
-      "id": "door"
+      "id": "ua-hub"
     }
   ],
   "capabilities": {
+    "forced_open": {
+      "type": "string",
+      "title": {
+        "en": "Forced open until"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": ""
+      },
+      "decimals": 0,
+      "insights": false,
+      "icon": "/assets/forced_open.svg"
+    },
+    "next_lock": {
+      "type": "string",
+      "title": {
+        "en": "Scheduled lock at"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": ""
+      },
+      "decimals": 0,
+      "insights": false,
+      "icon": "/assets/next_lock.svg"
+    },
     "time_duration": {
       "type": "enum",
       "title": {

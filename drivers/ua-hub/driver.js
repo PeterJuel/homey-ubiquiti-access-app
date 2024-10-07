@@ -6,7 +6,7 @@ const Homey = require("homey");
 
 class uaHubDriver extends Homey.Driver {
   async onInit() {
-    this.log("MyDriver has been initialized");
+    this.log("uaHubDriver has been initialized");
   }
 
   /**

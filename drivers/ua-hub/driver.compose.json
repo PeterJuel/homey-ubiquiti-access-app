@@ -5,7 +5,8 @@
   "class": "lock",
   "capabilities": [
     "locked",
-    "lock_mode"
+    "next_lock",
+    "forced_open"
   ],
   "pair": [
     {
