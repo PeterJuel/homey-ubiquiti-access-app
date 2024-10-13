@@ -12,6 +12,9 @@
         color: green;
         margin-top: 10px;
       }
+      #papertrail-settings {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -40,6 +43,27 @@
           <label class="homey-form-label" for="password">Password</label>
           <input class="homey-form-input" id="password" type="password" value="" />
         </div>
+
+        <!-- Enable Papertrail logging -->
+        <div class="field row">
+          <label class="homey-form-checkbox">
+            <input class="homey-form-checkbox-input" id="enable-papertrail" type="checkbox" />
+            <span class="homey-form-checkbox-checkmark"></span>
+            <span class="homey-form-checkbox-text"><span>Enable Papertrail logging (Optional)</span></span>
+          </label>
+        </div>
+
+        <!-- Papertrail Host and Port -->
+        <div id="papertrail-settings" style="display: none;">
+          <div class="homey-form-group">
+            <label class="homey-form-label" for="papertrail-host">Papertrail Host</label>
+            <input class="homey-form-input" id="papertrail-host" type="text" placeholder="logsX.papertrailapp.com" />
+          </div>
+          <div class="homey-form-group">
+            <label class="homey-form-label" for="papertrail-port">Papertrail Port</label>
+            <input class="homey-form-input" id="papertrail-port" type="number" placeholder="XXXXX" />
+          </div>
+        </div>
       </fieldset>
 
       <button id="save" class="homey-button-primary-full">Save changes</button>
@@ -53,6 +77,10 @@
         var ipAddressElement = document.getElementById("ip_address");
         var usernameElement = document.getElementById("username");
         var passwordElement = document.getElementById("password");
+        var enablePapertrailElement = document.getElementById("enable-papertrail");
+        var papertrailHostElement = document.getElementById("papertrail-host");
+        var papertrailPortElement = document.getElementById("papertrail-port");
+        var papertrailSettingsElement = document.getElementById("papertrail-settings");
         var saveElement = document.getElementById("save");
         var saveHintElement = document.getElementById("save-hint");
 
@@ -72,10 +100,44 @@
           passwordElement.value = password || '';
         });
 
+        Homey.get("papertrail-host", function (err, host) {
+          if (err) return Homey.alert(err);
+          papertrailHostElement.value = host || '';
+          checkPapertrailEnabled();
+        });
+
+        Homey.get("papertrail-port", function (err, port) {
+          if (err) return Homey.alert(err);
+          papertrailPortElement.value = port || '';
+          checkPapertrailEnabled();
+        });
+
+        // Check if Papertrail should be enabled based on host/port values
+        function checkPapertrailEnabled() {
+          const isPapertrailEnabled = papertrailHostElement.value || papertrailPortElement.value;
+          enablePapertrailElement.checked = !!isPapertrailEnabled;
+          togglePapertrailSettings(enablePapertrailElement.checked);
+        }
+
+        // Toggle visibility of Papertrail settings based on checkbox state
+        enablePapertrailElement.addEventListener("change", function () {
+          if (!enablePapertrailElement.checked) {
+            // Clear Papertrail settings when disabled
+            papertrailHostElement.value = '';
+            papertrailPortElement.value = '';
+          }
+          togglePapertrailSettings(enablePapertrailElement.checked);
+        });
+
+        // Function to show or hide Papertrail settings
+        function togglePapertrailSettings(show) {
+          papertrailSettingsElement.style.display = show ? 'block' : 'none';
+        }
+
         // Save the settings when the button is clicked
         saveElement.addEventListener("click", function (e) {
           e.preventDefault(); // Prevent form submission
-          
+
           Homey.set("ip_address", ipAddressElement.value, function (err) {
             if (err) return Homey.alert(err);
           });
@@ -85,6 +147,25 @@
           Homey.set("password", passwordElement.value, function (err) {
             if (err) return Homey.alert(err);
           });
+
+          if (enablePapertrailElement.checked) {
+            Homey.set("papertrail-host", papertrailHostElement.value, function (err) {
+              if (err) return Homey.alert(err);
+            });
+
+            Homey.set("papertrail-port", papertrailPortElement.value, function (err) {
+              if (err) return Homey.alert(err);
+            });
+          } else {
+            // Clear the Papertrail settings if the checkbox is unchecked
+            Homey.set("papertrail-host", '', function (err) {
+              if (err) return Homey.alert(err);
+            });
+
+            Homey.set("papertrail-port", '', function (err) {
+              if (err) return Homey.alert(err);
+            });
+          }
 
           // Show the "Saved" hint
           saveHintElement.style.display = 'block';
