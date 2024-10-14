@@ -2,7 +2,7 @@
 
 const Homey = require("homey");
 const Handler = require("../../lib/handlers");
-const { getDeviceById } = require("../../lib/api");
+const { updateLockStatus } = require("../../lib/api");
 
 class uaHubDevice extends Homey.Device {
   async onInit() {
@@ -25,7 +25,7 @@ class uaHubDevice extends Homey.Device {
     });
 
     // Set the initial lock status
-    await this.updateLockStatus();
+    await updateLockStatus(this, this.homey);
 
     // Start polling the lock status every 1 minute
     this.startPollingLockStatus();
@@ -33,33 +33,8 @@ class uaHubDevice extends Homey.Device {
 
   async startPollingLockStatus() {
     this.pollingInterval = setInterval(async () => {
-      await this.updateLockStatus();
+      await updateLockStatus(this, this.homey);
     }, 60 * 1000); // Poll every 60 seconds
-  }
-
-  async updateLockStatus() {
-    try {
-      const uniqueId = this.getData().unique_id;
-      const device = await getDeviceById(this.homey, uniqueId);
-
-      if (device) {
-        const lockState = device.configs.find(
-          (config) => config.key === "input_state_rly-lock_dry"
-        );
-
-        if (lockState) {
-          const isLocked = lockState.value === "off";
-          this.log(`Polled lock status: ${isLocked ? "Locked" : "Unlocked"}`);
-
-          // Update the capability status if needed
-          if (this.getCapabilityValue("locked") !== isLocked) {
-            await this.setCapabilityValue("locked", isLocked);
-          }
-        }
-      }
-    } catch (error) {
-      this.log("Error updating lock status:", error.message);
-    }
   }
 
   async onDeleted() {

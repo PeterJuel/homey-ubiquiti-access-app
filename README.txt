@@ -1,1 +1,3 @@
-Seamlessly manage door access and security, and let the doors open for you.
+Enable seamless door access with your smart devices—unlock doors with a simple button press or automatically when you arrive home. This app uses the unofficial API and requires you to create a local user on your Unifi console. Please input your information in the configuration.
+
+For the best experience, doors should remain locked by default and only open upon request. The app respects your normal settings, with the limitation that the app does not handle second but only full minutes. Note that doors can't be re-locked during the standard opening period, but the app will keep you informed.

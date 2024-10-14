@@ -27,6 +27,34 @@
     "email": "peterjuel@gmail.com"
   },
   "brandColor": "#275ed9",
+  "flow": {
+    "actions": [
+      {
+        "id": "unlock_for_duration",
+        "title": {
+          "en": "Unlock door for a specific duration"
+        },
+        "titleFormatted": {
+          "en": "Unlock door for [[duration]] minutes"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=ua-hub"
+          },
+          {
+            "name": "duration",
+            "type": "number",
+            "title": {
+              "en": "Duration in minutes"
+            },
+            "min": 1
+          }
+        ]
+      }
+    ]
+  },
   "drivers": [
     {
       "name": {
@@ -94,34 +122,6 @@
       "decimals": 0,
       "insights": false,
       "icon": "/assets/next_lock.svg"
-    },
-    "time_duration": {
-      "type": "enum",
-      "title": {
-        "en": "Unlock Duration"
-      },
-      "getable": true,
-      "setable": true,
-      "values": [
-        {
-          "id": "1_hour",
-          "title": {
-            "en": "1 Hour"
-          }
-        },
-        {
-          "id": "2_hours",
-          "title": {
-            "en": "2 Hours"
-          }
-        },
-        {
-          "id": "3_hours",
-          "title": {
-            "en": "3 Hours"
-          }
-        }
-      ]
     }
   }
 }

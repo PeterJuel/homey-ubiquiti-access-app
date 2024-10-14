@@ -1,12 +1,37 @@
 "use strict";
 const axios = require("axios");
-const { getDevices } = require("../../lib/api"); // Import the API functions
+const { getDevices } = require("../../lib/api"); 
 const { reLogin } = require("../../lib/auth");
+const Handler = require("../../lib/handlers");
 const Homey = require("homey");
 
 class uaHubDriver extends Homey.Driver {
   async onInit() {
     this.log("uaHubDriver has been initialized");
+
+    // Register the flow card for unlocking for a specific duration
+    const unlockForDurationAction = this.homey.flow.getActionCard(
+      "unlock_for_duration"
+    );
+
+    // Register listener for when the flow card is executed
+    unlockForDurationAction.registerRunListener(async (args) => {
+      const { device, duration } = args;
+
+      if (!device) {
+        throw new Error("No device selected");
+      }
+
+      this.log(
+        `Unlocking device ${device.getName()} for ${duration} minute(s)`
+      );
+
+      // Use the handler to unlock the device for the specified duration
+      const handler = new Handler(device);
+      await handler.handleUnlock(duration);
+
+      return Promise.resolve(true);
+    });
   }
 
   /**
