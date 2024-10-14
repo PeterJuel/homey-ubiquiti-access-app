@@ -1,8 +1,11 @@
 {
   "1.0.0": {
-    "en": "First version"
+    "en": "Initial release with core door access functionality."
   },
   "1.0.1": {
-    "en": "Paperlog support"
+    "en": "Added Papertrail support for enhanced logging capabilities."
+  },
+  "1.0.2": {
+    "en": "Added a flowcard for unlocking the door for a specified duration."
   }
 }
