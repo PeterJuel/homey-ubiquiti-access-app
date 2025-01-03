@@ -60,7 +60,10 @@ class uaHubDriver extends Homey.Driver {
 
       // Filter devices by type "UAH" and return only those
       return devices
-        .filter((device) => device.device_type === "UAH")
+        .filter(
+          (device) =>
+            device.device_type === "UAH" || device.device_type === "UAH-DOOR"
+        )
         .map((device) => ({
           name: device.alias,
           data: {
