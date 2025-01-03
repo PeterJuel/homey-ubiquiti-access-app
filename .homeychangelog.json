@@ -7,5 +7,8 @@
   },
   "1.0.2": {
     "en": "Added a flowcard for unlocking the door for a specified duration."
+  },
+  "1.0.3": {
+    "en": "Adds support for Access Hub devices included in bundles"
   }
 }
